@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>File Downloader</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: 50px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .form-group input[type="text"] {
+      width: 100%;
+      padding: 5px;
+    }
+
+    .form-group button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .form-group button:hover {
+      background-color: #45a049;
+    }
+
+    #progress-bar {
+      width: 100%;
+      height: 10px;
+      background-color: #f2f2f2;
+      border-radius: 5px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    #progress-bar .progress {
+      height: 100%;
+      background-color: #4CAF50;
+      border-radius: 5px;
+      width: 0%;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>File Downloader</h2>
+    <div class="form-group">
+      <label for="file-url">File URL:</label>
+      <input type="text" id="file-url" placeholder="Enter the file URL">
+    </div>
+    <div class="form-group">
+      <button onclick="downloadFile()">Download</button>
+    </div>
+    <div id="progress-bar">
+      <div class="progress"></div>
+    </div>
+  </div>
+
+  <script>
+    function downloadFile() {
+      var fileUrl = document.getElementById('file-url').value;
+
+      if (fileUrl === '') {
+        alert('Please enter a file URL');
+        return;
+      }
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', fileUrl, true);
+      xhr.responseType = 'blob';
+
+      xhr.onloadstart = function () {
+        document.getElementById('progress-bar').style.display = 'block';
+      };
+
+      xhr.onprogress = function (event) {
+        if (event.lengthComputable) {
+          var percentComplete = (event.loaded / event.total) * 100;
+          document.querySelector('.progress').style.width = percentComplete + '%';
+        }
+      };
+
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          var blob = new Blob([xhr.response], { type: 'application/octet-stream' });
+          var url = window.URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = fileUrl.split('/').pop();
+          a.click();
+          window.URL.revokeObjectURL(url);
+        } else {
+          alert('Error downloading the file');
+        }
+
+        document.getElementById('progress-bar').style.display = 'none';
+        document.querySelector('.progress').style.width = '0%';
+      };
+
+      xhr.send();
+    }
+  </script>
+</body>
+</html>
